@@ -126,134 +126,87 @@ function setupCharacter(a,b)
   local decks = {bane_deck,assets_deck,talent_deck,boon_deck,spell_deck,u_assets_deck}
   for k,v in pairs(a.getVar('starters')) do
     for i=1,#decks do
-      if type(searchForIn(v,decks[i],{rotation={0,180,0},position={a.getPosition().x+2+card_offset,a.getPosition().y+1,a.getPosition().z}})) == 'userdata' then break end
-  a.removeButton(0)  end
+      if type(searchForIn(v,decks[i],{rotation={0,180,0},position={a.getPosition().x-2+card_offset,a.getPosition().y+1,a.getPosition().z+4}})) == 'userdata' then 
+        break 
+      end
+      a.removeButton(0)  
+    end
     card_offset = card_offset + 1
   end
-  local token = searchForIn(a.getName(),pawn_bag,{position={a.getPosition().x-2,a.getPosition().y+2,a.getPosition().z}})
-  local hp = getObjectFromGUID(hp_bag).takeObject({position={a.getPosition().x,a.getPosition().y+2,a.getPosition().z+3}})
-  local san = getObjectFromGUID(san_bag).takeObject({position={a.getPosition().x,a.getPosition().y+2,a.getPosition().z-3}})
-  hp.Counter.setValue(a.getVar('hp'))
-  san.Counter.setValue(a.getVar('san'))
+  
+  local token = searchForIn(a.getName(),pawn_bag,{position={a.getPosition().x-6,a.getPosition().y+2,a.getPosition().z+4}})
+
+  -- fallback positions
+  local healthSnapPoint = { position={a.getPosition().x,a.getPosition().y+2,a.getPosition().z+3} }
+  local sanitySnapPoint = { position={a.getPosition().x,a.getPosition().y+2,a.getPosition().z-3} }
+  -- get health/sanity positions from snapshots
+  for _,snapPoint in pairs(a.getSnapPoints()) do
+    for _,tag in ipairs(snapPoint.tags) do
+      if tag == "token_toughness" then
+        healthSnapPoint = snapPoint
+        break
+      elseif tag == "token_sanity" then
+        sanitySnapPoint = snapPoint
+        break
+      end
+    end
+  end
+  
+  -- fetch health token
+  getObjectFromGUID(hp_bag)
+    .takeObject({
+      position = a.positionToWorld(healthSnapPoint.position),
+      rotation = a.getRotation() + healthSnapPoint.rotation,
+      callback_function = function(spawnedObject) spawnedObject.setState(a.getVar('hp')) end
+    })
+  -- fetch sanity token
+  getObjectFromGUID(san_bag)
+    .takeObject({
+      position = a.positionToWorld(sanitySnapPoint.position),
+      rotation = a.getRotation() + sanitySnapPoint.rotation,
+      callback_function = function(spawnedObject) spawnedObject.setState(a.getVar('san')) end
+    })
   token.setColorTint(stringColorToRGB(b))
   local namepos = Player[b].getPlayerHand()
 end
 
-
 function setupCharacterF(a,b)
-  local card_offset = 0
-  local decks = {bane_deck,assets_deck,talent_deck,boon_deck,spell_deck,u_assets_deck}
-  for k,v in pairs(a.getVar('starters')) do
-    for i=1,#decks do
-      if type(searchForIn(v,decks[i],{rotation={0,180,0},position={a.getPosition().x+2+card_offset,a.getPosition().y+1,a.getPosition().z}})) == 'userdata' then break end
-  a.removeButton(0)  end
-    card_offset = card_offset + 1
-  end
+  setupCharacter(a,b)
+  
   getObjectFromGUID(focus_bag).takeObject({position={a.getPosition().x,a.getPosition().y+2,a.getPosition().z}})
-  local token = searchForIn(a.getName(),pawn_bag,{position={a.getPosition().x-2,a.getPosition().y+2,a.getPosition().z}})
-  local hp = getObjectFromGUID(hp_bag).takeObject({position={a.getPosition().x,a.getPosition().y+2,a.getPosition().z+3}})
-  local san = getObjectFromGUID(san_bag).takeObject({position={a.getPosition().x,a.getPosition().y+2,a.getPosition().z-3}})
-  hp.Counter.setValue(a.getVar('hp'))
-  san.Counter.setValue(a.getVar('san'))
-  token.setColorTint(stringColorToRGB(b))
-  local namepos = Player[b].getPlayerHand()
 end
 
 function setupCharacterW(a,b)
-  local card_offset = 0
-  local decks = {bane_deck,assets_deck,talent_deck,boon_deck,spell_deck,u_assets_deck}
-  for k,v in pairs(a.getVar('starters')) do
-    for i=1,#decks do
-      if type(searchForIn(v,decks[i],{rotation={0,180,0},position={a.getPosition().x+2+card_offset,a.getPosition().y+1,a.getPosition().z}})) == 'userdata' then break end
-  a.removeButton(0)  end
-    card_offset = card_offset + 1
-  end
+  setupCharacter(a,b)
+
+  -- TODO place on snappoint
   getObjectFromGUID(will_bag).takeObject({position={a.getPosition().x,a.getPosition().y+2,a.getPosition().z}})
-  local token = searchForIn(a.getName(),pawn_bag,{position={a.getPosition().x-2,a.getPosition().y+2,a.getPosition().z}})
-  local hp = getObjectFromGUID(hp_bag).takeObject({position={a.getPosition().x,a.getPosition().y+2,a.getPosition().z+3}})
-  local san = getObjectFromGUID(san_bag).takeObject({position={a.getPosition().x,a.getPosition().y+2,a.getPosition().z-3}})
-  hp.Counter.setValue(a.getVar('hp'))
-  san.Counter.setValue(a.getVar('san'))
-  token.setColorTint(stringColorToRGB(b))
-  local namepos = Player[b].getPlayerHand()
 end
 
 function setupCharacterTC(a,b)
-  local card_offset = 0
-  local decks = {bane_deck,assets_deck,talent_deck,boon_deck,spell_deck,u_assets_deck}
-  for k,v in pairs(a.getVar('starters')) do
-    for i=1,#decks do
-      if type(searchForIn(v,decks[i],{rotation={0,180,0},position={a.getPosition().x+2+card_offset,a.getPosition().y+1,a.getPosition().z}})) == 'userdata' then break end
-  a.removeButton(0)  end
-    card_offset = card_offset + 1
-  end
+  setupCharacter(a,b)
+  
   getObjectFromGUID(ticket_bag).takeObject({position={a.getPosition().x,a.getPosition().y+2,a.getPosition().z}})
   getObjectFromGUID(clue_bag).takeObject({position={a.getPosition().x,a.getPosition().y+3,a.getPosition().z}})
-  local token = searchForIn(a.getName(),pawn_bag,{position={a.getPosition().x-2,a.getPosition().y+2,a.getPosition().z}})
-  local hp = getObjectFromGUID(hp_bag).takeObject({position={a.getPosition().x,a.getPosition().y+2,a.getPosition().z+3}})
-  local san = getObjectFromGUID(san_bag).takeObject({position={a.getPosition().x,a.getPosition().y+2,a.getPosition().z-3}})
-  hp.Counter.setValue(a.getVar('hp'))
-  san.Counter.setValue(a.getVar('san'))
-  token.setColorTint(stringColorToRGB(b))
-  local namepos = Player[b].getPlayerHand()
 end
 
 function setupCharacterRC(a,b)
-  local card_offset = 0
-  local decks = {bane_deck,assets_deck,talent_deck,boon_deck,spell_deck,u_assets_deck}
-  for k,v in pairs(a.getVar('starters')) do
-    for i=1,#decks do
-      if type(searchForIn(v,decks[i],{rotation={0,180,0},position={a.getPosition().x+2+card_offset,a.getPosition().y+1,a.getPosition().z}})) == 'userdata' then break end
-  a.removeButton(0)  end
-    card_offset = card_offset + 1
-  end
+  setupCharacter(a,b)
+  
   getObjectFromGUID(resource_bag).takeObject({position={a.getPosition().x,a.getPosition().y+2,a.getPosition().z}})
   getObjectFromGUID(clue_bag).takeObject({position={a.getPosition().x,a.getPosition().y+3,a.getPosition().z}})
-  local token = searchForIn(a.getName(),pawn_bag,{position={a.getPosition().x-2,a.getPosition().y+2,a.getPosition().z}})
-  local hp = getObjectFromGUID(hp_bag).takeObject({position={a.getPosition().x,a.getPosition().y+2,a.getPosition().z+3}})
-  local san = getObjectFromGUID(san_bag).takeObject({position={a.getPosition().x,a.getPosition().y+2,a.getPosition().z-3}})
-  hp.Counter.setValue(a.getVar('hp'))
-  san.Counter.setValue(a.getVar('san'))
-  token.setColorTint(stringColorToRGB(b))
-  local namepos = Player[b].getPlayerHand()
 end
 
 function setupCharacterC(a,b)
-  local card_offset = 0
-  local decks = {bane_deck,assets_deck,talent_deck,boon_deck,spell_deck,u_assets_deck}
-  for k,v in pairs(a.getVar('starters')) do
-    for i=1,#decks do
-      if type(searchForIn(v,decks[i],{rotation={0,180,0},position={a.getPosition().x+2+card_offset,a.getPosition().y+1,a.getPosition().z}})) == 'userdata' then break end
-  a.removeButton(0)  end
-    card_offset = card_offset + 1
-  end
+  setupCharacter(a,b)
+  
   getObjectFromGUID(clue_bag).takeObject({position={a.getPosition().x,a.getPosition().y+2,a.getPosition().z}})
-  local token = searchForIn(a.getName(),pawn_bag,{position={a.getPosition().x-2,a.getPosition().y+2,a.getPosition().z}})
-  local hp = getObjectFromGUID(hp_bag).takeObject({position={a.getPosition().x,a.getPosition().y+2,a.getPosition().z+3}})
-  local san = getObjectFromGUID(san_bag).takeObject({position={a.getPosition().x,a.getPosition().y+2,a.getPosition().z-3}})
-  hp.Counter.setValue(a.getVar('hp'))
-  san.Counter.setValue(a.getVar('san'))
-  token.setColorTint(stringColorToRGB(b))
-  local namepos = Player[b].getPlayerHand()
 end
 
 function setupCharacterT(a,b)
-  local card_offset = 0
-  local decks = {bane_deck,assets_deck,talent_deck,boon_deck,spell_deck,u_assets_deck}
-  for k,v in pairs(a.getVar('starters')) do
-    for i=1,#decks do
-      if type(searchForIn(v,decks[i],{rotation={0,180,0},position={a.getPosition().x+2+card_offset,a.getPosition().y+1,a.getPosition().z}})) == 'userdata' then break end
-  a.removeButton(0)  end
-    card_offset = card_offset + 1
-  end
+  setupCharacter(a,b)
+  
   getObjectFromGUID(ticket_bag).takeObject({position={a.getPosition().x,a.getPosition().y+2,a.getPosition().z}})
-  local token = searchForIn(a.getName(),pawn_bag,{position={a.getPosition().x-2,a.getPosition().y+2,a.getPosition().z}})
-  local hp = getObjectFromGUID(hp_bag).takeObject({position={a.getPosition().x,a.getPosition().y+2,a.getPosition().z+3}})
-  local san = getObjectFromGUID(san_bag).takeObject({position={a.getPosition().x,a.getPosition().y+2,a.getPosition().z-3}})
-  hp.Counter.setValue(a.getVar('hp'))
-  san.Counter.setValue(a.getVar('san'))
-  token.setColorTint(stringColorToRGB(b))
-  local namepos = Player[b].getPlayerHand()
 end
 
 function createButtons()
@@ -265,6 +218,7 @@ function createButtons()
                           width = 1000,
                           height = 550})
   assetButtons()
+  debtButton()
 end
 
 function assetButtons()
@@ -295,6 +249,16 @@ function assetButtons()
                           height = 500})
 end
 
+function debtButton()
+  local gameboard = getObjectFromGUID(game_board)
+  gameboard.createButton({click_function = 'drawDebt',
+                          label = 'Draw debt',
+                          font_size = 300,
+                          position = {-25.1,0.1,13},
+                          width = 1500,
+                          height = 500})
+end
+
 function assets1()
   local pos = getObjectFromGUID(game_board).getPosition()
   searchForIn('',assets_deck,{position={pos.x-21.5,1.5,pos.z-16}}).setRotation({0,180,0})
@@ -313,6 +277,11 @@ end
 function assets4()
   local pos = getObjectFromGUID(game_board).getPosition()
   searchForIn('',assets_deck,{position={pos.x-10,1.5,pos.z-16}}).setRotation({0,180,0})
+end
+
+function drawDebt()
+  local pos = getObjectFromGUID(game_board).getPosition()
+  searchForIn('debt',decks.deals,{position={pos.x-25.1,1.5,pos.z-16}}).setRotation({0,180,0})
 end
 
 function startGame(a, b)
